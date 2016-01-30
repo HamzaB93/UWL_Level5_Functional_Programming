@@ -1,0 +1,27 @@
+#lang racket
+
+;; INTRODUCTION 3
+
+;; List Creating
+
+;; Template for creating lists containing information
+(define (make-train name
+                    departs
+                    carriages
+                    carriage_capacity)
+  `((name ,name)
+    (departs ,departs)
+    (carriages ,carriages)
+    (carriage_capacity ,carriage_capacity)))
+
+;; Can keep using the above function with new data to create
+;; more entries.
+;; Different quote for the list, it is ` not ' called
+;; quasiquote and allows us to pass the values
+;; to the variables to the list
+;; We use , to indicate where the variables are, comma
+;; is unquote.
+
+;; Can now supply data to the function several times and
+;; collect the result in a new list
+

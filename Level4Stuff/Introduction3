@@ -1,0 +1,71 @@
+#lang racket
+
+;; INTRODUCTION 3
+
+;; List Creating
+
+;; Template for creating lists containing information
+(define (make-train name
+                    departs
+                    carriages
+                    carriage_capacity)
+  `((name ,name)
+    (departs ,departs)
+    (carriages ,carriages)
+    (carriage_capacity ,carriage_capacity)))
+
+;; Can keep using the above function with new data to create
+;; more entries.
+;; Different quote for the list, it is ` not ' called
+;; quasiquote and allows us to pass the values
+;; to the variables to the list
+;; We use , to indicate where the variables are, comma
+;; is unquote.
+
+;; Can now supply data to the function several times and
+;; collect the result in a new list
+(define gordon
+  (make-train "Gordon" "10:00" 5 20))
+(define thomas
+  (make-train "Thomas" "09:00" 10 40))
+(define edward
+  (make-train "Edward" "11:32" 7 25))
+(define henry
+  (make-train "Henry" "10:07" 2 50))
+
+(define trains (list gordon thomas edward henry))
+
+;; Pretty printing results
+;; Very useful function when working with nested lists
+
+;(((name "Gordon")
+;  (departs "10:00")
+;  (carriages 5)
+;  (carriage_capacity 20))
+; ((name "Thomas")
+;  (departs "09:00")
+;  (carriages 10)
+;  (carriage_capacity 40))
+; ((name "Edward")
+;  (departs "11:32")
+;  (carriages 7)
+;  (carriage_capacity 25))
+; ((name "Henry")
+; (departs "10:07")
+; (carriages 2)
+;  (carriage_capacity 50)))
+
+;; We have a list of length 4
+;; Each item is another list
+
+;; Can easily retrieve items from a list using association lists
+(assoc '(name "Edward") trains)
+;; List searched sequentially to see if we can match
+;; against the first item in that list, if we get a match
+;; that list is returned.
+
+;; Can use assq because we are mathcing against symbols
+(assq 'departs (assoc '(name "Gordon") trains))
+
+
+

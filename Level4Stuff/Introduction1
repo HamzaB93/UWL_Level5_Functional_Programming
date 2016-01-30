@@ -1,0 +1,168 @@
+#lang racket
+
+;; Introduction to scheme
+
+;; 1) Functions
+
+; a) Area of a circle
+;(define (area r) (* 3.14 (* r r)))
+
+; b) A better Area function
+;(define PI 3.14)
+
+;(define (area r)
+;  (* PI (* r r)))
+
+;; Tasks
+
+; a) Dollar to euro
+;(define EURO 0.92)
+
+;(define (d-t-e d)
+;  (* d EURO))
+
+; b) Celcius to fahrenheit
+;(define (cel-to-fah c)
+;  (+ 32 (* 1.8 c)))
+
+; c) VAT
+;(define (vat p)
+;  (+ p(* p 0.2)))
+
+; d) BMI
+;(define (bmi p h)
+;  (* 703 (/ p (* h h))))
+
+;; 2) Functions 2
+
+; a) Area of a ring
+;(define (area-of-ring r1 r2)
+;  (- (* 3.14 (* r1 r1))
+;     (* 3.14 (* r1 r2))))
+
+; b) Better area of a ring
+;(define PI 3.14)
+
+;(define (area-of-circle r)
+;  (* PI (* r r)))
+
+;(define (area-of-ring r1 r2)
+;  (- (area-of-circle r1)
+;     (area-of-cirlce r2)))
+
+;; 3) Comparing expressions
+
+;(and (= 5 5) (< 5 6))
+;(and (= 5 5) (< 5 5))
+;(and (> 4 3) (<= 10 100))
+;(or (> 4 3) (= 10 100))
+;(not (= 2 3))
+
+;; 4) Conditional Expression
+
+; a) foo
+;(define (foo x y)
+;  (cond
+;    [(= x y) "Equals"]
+;    [(> x y) "Greater than"]
+;    [(< x y) "Less than"]))
+
+; b) Better foo
+;(define (bar x y)
+;  (cond
+;    [(= x y) "Equals"]
+;    [(> x y) "Greater than"]
+;    [else "Less than"]))
+
+;; Task
+
+; a) GPA
+;(define (gpa g)
+;  (cond
+;    [(< g 2.5) "Nothing"]
+;    [(and (>= g 2.5) (< g 3.0)) "$300"]
+;    [(and (>= g 3.0) (<= g 4.0)) "350"]))
+
+; b) bmi
+;(define (bmi b)
+;  (cond
+;    [(< b 18.5) "Underweight"]
+;    [(and (>= b 18.5) (< b 25)) "Normal Weight"]
+;    [(and (>= b 25) (< b 30)) "Overweight"]
+;    [(and (>= b 30) (< b 35)) "Obese Level 1"]
+;    [(and (>= b 35) (< b 40)) "Obese Level 2"]
+;    [(> b 40) "Obese Level 3"]))
+
+;; 5) Lambda
+
+; a) Area of a cirlce
+;(define PI 3.14)
+
+;(define area-of-circle
+;  (lambda (r)
+;    (* PI (* r r))))
+
+; b) Addition
+;(define foo
+;  (lambda (x y z)
+;    (+ x y z)))
+
+;; 6) Let
+
+; a) First example, what will foo 10 be? 11? 12!!
+;(define (bar x)
+;  (+ x 1))
+
+;(define (foo x)
+;  (let ((y (bar x)))
+;    (bar y)))
+
+; b) Let with some lambda
+;(define foo
+;  (lambda (x)
+;    (let ((y (lambda (z) (+ z 1))))
+;      (y 10))))
+
+; c) Another let
+;(define foo
+;  (lambda ()
+;    (let [(x 10)
+;          (y 10)
+;          (z 10)]
+;      (+ x y z))))
+
+;; 7) Let*
+
+; a) Normal Let
+;(define foo
+;  (lambda (x)
+;    (let ((y 1))
+;      (let ((x y))
+;        (+ x y)))))
+
+; b) Let*
+;(define foo
+;  (lambda ()
+;    (let* [(y 1)
+;           (x y)]
+;      (+ x y))))
+
+;; 8) Named Let
+;(require srfi/48)
+
+;(define (foo x)
+;  (let loop [(count x)]
+;    (cond [(zero? count)
+;           (format #t "Blast off!\n")]
+;          [else
+;           (format #t "~a/n" count)
+;           (loop (- count 1))])))
+
+(define (foo x)
+  (let loop [(count 0)
+             (total 0)]
+    (if (> count x)
+        total
+        (loop
+         (+ count 1)
+         (+ total count)))))

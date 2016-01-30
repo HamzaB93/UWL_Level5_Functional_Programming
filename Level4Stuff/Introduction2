@@ -1,0 +1,106 @@
+#lang racket
+
+;; INTRODUCTION TO SCHEME 2
+
+;; 1) Recursion
+
+; a) Factorial
+;(define (fac n)
+;  (if (zero? n)
+;      1
+;      (* n (fac (- n 1)))))
+
+; Tracing the execution
+; (fac 3)
+; (* 3 (fac 2))
+; (* 3 (* 2 (fac 1)))
+; (* 3 (* 2 (* 1 (fac 0))))
+; (* 3 (* 2 (* 1 1)))
+; (* 3 (* 2 1))
+; (* 3 2)
+; 6
+
+;; 2) List Recursion
+
+; a) Length of list
+;(define (len l)
+;  (if (null? l)
+;      0
+;      (+ 1 (len (cdr l)))))
+
+; Tracing the execution
+; (len '(a b c))
+; (+ 1 (len '(b c)))
+; (+ 1 (+ 1 (len '(c))))
+; (+ 1 (+ 1 (+ 1 (len '()))))
+; (+ 1 (+ 1 (+ 1 0)))
+; (+ 1 (+ 1 1))
+; (+ 1 2)
+; 3
+
+;; 3) Working with lists
+
+; a) Member
+;(define (member x l)
+;  (cond
+;    ((null? l) #f)
+;    ((eq? x (car l)) #t)
+;    (else (member x (cdr l)))))
+
+; b) Remove from list
+;(define (remove x l)
+;  (cond
+;    ((null? l)
+;     '())
+;    ((eq? x (car l))
+;     (remove x (cdr l)))
+;    (else
+;     (cons (car l) (remove x (cdr l))))))
+
+; Tracing the execution
+; (remove 'b 'a b c))
+; (cons 'a (remove 'b '(b c)))
+; (cons 'a (remove 'b '(c)))
+; (cons 'a (cons 'c (remove 'b '())))
+; (cons 'a (cons 'c '()))
+; (cons 'a '(c))
+; '(a c )
+
+;; 3) Higher order functions
+
+;; Map is a function that takes a function and applies it
+;; to a list of values
+
+; a) Using map
+;(define (add1 x)
+;  (+ x 1))
+; enter (map add1 '(1 2 3 4 5)) in the terminal
+
+; b) Using map again with lambda
+;(map
+; (lambda (x) (+ x 1))
+; '(1 2 3 4 5))
+
+; c) Using fold
+; Works by applying the function to each value,
+; then combines the result
+
+;(foldl + 0 '(1 2 3 4 5))
+;(foldl * 1 '(1 2 3 4 5))
+;(foldl cons '() '(1 2 3 4 5))
+
+; d) Using for-each
+;; We dont return anything so we make our code
+;; do something that is visible to us.
+;(require srfi/48)
+;(define (blastoff)
+;  (for-each
+;   (lambda (n)
+;     (format #t "~a\n" n))
+;   '(5 4 3 2 1))
+;  (format #t "Blast off!\n"))
+
+; e) Applying predicates
+;(any even? '(1 2 3 4 5))
+;(every even? '(1 2 3 4 5)))
+;(every even? (remove odd? '(1 2 3 4 5)))
