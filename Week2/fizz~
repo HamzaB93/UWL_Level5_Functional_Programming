@@ -1,0 +1,19 @@
+#lang racket
+(require racket/local)
+(require racket/stream)
+
+;(define (fizzbuzz x)
+;  (if (zero? (modulo 15 x))
+;      "Fizz Buzz")
+;  (if (zero? (modulo 5 x))
+;      "Fizz")
+;  (if (zero? (modulo 3 x))
+;      "Buzz")
+;  (else (number->string n)))
+
+(define (fizzbuzz2 x)
+  (cond
+    [(zero? (modulo 5 x)) "Fizz"]
+    [(zero? (modulo 3 x)) "Buzz"]
+    [(zero? (modulo 15 x)) "Fizz Buzz"]
+    [else (number->string x)]))
