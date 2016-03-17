@@ -132,11 +132,11 @@
 ; a)
 
 ; Let
-;(define foo
-;  (lambda (x)
-;    (let ((y 1))
-;      (let ((x y))
-;        (+ x y)))))
+(define foo
+  (lambda (x)
+    (let ((y 1))
+      (let ((x y))
+        (+ x y)))))
 
 ; Let*
 ;(define foo
@@ -168,12 +168,12 @@
 
 ; b)
 
-(define (foo x)
-  (let loop [(count 0)
-             (total 0)]
-    (if (> count x)
-        total
-        (loop
-         (+ count 1)
-         (+ total count)))))
+;(define (foo x)
+;  (let loop [(count 0)
+;             (total 0)]
+;    (if (> count x)
+;        total
+;        (loop
+;         (+ count 1)
+;         (+ total count)))))
                     

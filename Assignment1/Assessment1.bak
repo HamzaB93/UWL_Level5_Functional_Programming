@@ -1,0 +1,125 @@
+#lang racket
+
+;; Functional Programming Assingment Code
+
+;; Here the user defined functions from the book
+;; "The Little Schemer" will be written. The aim is to
+;; understand what the code does and give the tracing
+;; execution
+
+;; Chapter 1) Toys
+
+(define atom?
+  (lambda (x)
+    (and (not (pair? x))
+         (not (null? x)))))
+
+;; A trace of execution
+
+; 1)
+; (atom? 'Adam)
+
+; (and (not (pair? 'Adam))
+;      (not (null? 'Adam)))
+
+; (and (not #f)
+;      (not #f))
+
+; (and #t #t))
+
+; #t
+
+; 2)
+; (atom? '())
+
+; (and (not (pair? '()))
+;      (not (null? '())))
+
+; (and (not #f)
+;      (not #t))
+
+; (and #t #f)
+
+; #f
+
+;; Chapter 2: Do it, Do it again, and again and again
+
+;; lat?
+(require racket/trace)
+(define lat?
+  (lambda (l)
+    (cond
+      [(null? l) #t]
+      [(atom? (car l)) (lat? (cdr l))]
+      (else #f))))
+(trace lat?)
+
+; Tracing execution
+
+; (lat? '(Andrew Ben Charlie))
+; (#t (lat? '(Ben Charlie)))
+; (#t (#t (lat? '(Charlie))))
+; (#t (#t (#t (lat? '()))))
+; #t
+
+; (lat? '(Andrew (Ben) Charlie))
+; (#t (lat? '((Ben) Charlie)))
+; #f
+
+
+;; member?
+(require racket/trace)
+(define member?
+  (lambda (a lat)
+    (cond
+      [(null? lat) #f]
+      (else (or (eq? (car lat) a)
+                (member? a (cdr lat)))))))
+(trace member?)
+
+; Tracing execution
+
+; (member? 'Joe '(Hamza Amrit Joe Tashan))
+; (member? 'Joe '(Amrit Joe Tashan))
+; (member? 'Joe '(Joe Tashan))
+; #t
+
+; (member? 'Joe '(Hamza Amrit Tashan))
+; (member? 'Joe '(Amrit Tashan))
+; (member? 'Joe '(Tashan))
+; (member? 'Joe '())
+; #f
+
+;; Chapter 3: Cons the Magnificent
+
+;; rember
+
+(define rember
+  (lambda (a lat)
+    (cond
+       ((null? lat) (quote ()))
+       ((eq? (car lat) a) (cdr lat))
+       (else (cons (car lat)
+                   (rember a (cdr lat)))))))
+(trace rember)
+
+; Tracing execution
+
+;; firsts
+
+(define firsts
+  (lambda (l)
+    (cond
+      ((null? l) '())
+      (else
+       (cons (car (car l)) (firsts (cdr l)))))))
+(trace firsts)
+
+;; insertR
+(define insertR
+  (lambda (new old lat)
+    (cond
+      ((null? lat) (quote '()))
+      (else (cond
+              ((eq? (car lat) old) (cons old (cons new (cdr lat))))
+              (else (cons (car lat) (insertR new old (cdr lat)))))))))

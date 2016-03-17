@@ -1,0 +1,16 @@
+#lang racket
+
+;; Functional Programming Assingment Code
+
+;; Here the user defined functions from the book
+;; "The Little Schemer" will be written. The aim is to
+;; understand what the code does and give the tracing
+;; execution
+
+;; Chapter 1) Toys
+
+(define atom?
+  (lambda (x)
+    (and (not (pair? x))
+         (not (null? x)))))
+
