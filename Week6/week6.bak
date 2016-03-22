@@ -1,8 +1,0 @@
-#lang racket
-
-; WEEK 6 - Working to assignment 2
-
-;; 1) Basic command-line processor
-
-(defi
-
