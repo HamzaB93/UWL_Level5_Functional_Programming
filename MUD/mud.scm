@@ -1,5 +1,9 @@
 #lang racket
 
+(require srfi/1)
+(require srfi/13)
+(require srfi/48)
+
 ;; The first version of MUD game
 ;; First version is basic command line
 
@@ -29,12 +33,36 @@
 (define (assq-ref assqlist id)
   (cdr (assq id assqlist)))
 
+(define (assv-ref assqlist id)
+  (cdr (assv id assqlist)))
+
 ; Get the room description by taking the room id
 ; uses the descriptions table and the rid
 ; uses assq-ref function to return the appropriate list depending on the id
 ; cars the list to look presentable
 (define (get-room-description rid)
   (car (assq-ref descriptions rid)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Keyword based input
+
+(define (get-keywords id)
+  (let ((keys (assq-ref directions id)))
+    (map (lambda (key) (car key)) keys)))
+
+(define (list-of-lengths keylist tokens)
+  (map
+   (lambda (x)
+     (let ((set (lset-intersection eq? tokens x)))
+       (* (/ (length set) (length x)) (length set))))
+   keylist))
+
+(define (index-of-largest-number list-of-numbers)
+  (let ((n (car (sort list-of-numbers >))))
+    (if (zero? n)
+        #f
+        (list-index (lambda (x) (eq? x n)) list-of-numbers))))
+
 
 ; Gets the id of the room that the user wants to go to
 ; Uses the current room and the atom the user inputs
@@ -44,8 +72,13 @@
 ; assq-ref used again to return the the room id by checking to see if the
 ; input matches any direction from the returned list
 ; lastly the room id is retunred of the new room
-(define (lookup room-id direction)
-  (car (assq-ref (assq-ref directions room-id) direction)))
+(define (lookup id tokens)
+  (let* ((record (assv-ref directions id))
+         (keylist (get-keywords id))
+         (index (index-of-largest-number (list-of-lengths keylist tokens))))
+    (if index
+        (cadr (list-ref record index))
+        #f)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -53,28 +86,20 @@
 ;; The game
 
 ; Game takes an initial id, being room 1
-(define (startgame room-id)
-  ; Named let loop, makes rid the room-id
-  (let loop ((rid room-id))
-    ; Prints the room description
-    (printf "~a\n" (get-room-description rid))
-    (printf "> ")
-    ; User input
-    (let ((input (read)))
-      ; If the input is 'quit, exit game
-      (if (eq? input 'quit) (exit) 'continue)
-      ; If the input is anyone of these
-      (if (member input '(north south east west))
-          ; Will try and get the id of the new room depending on the input
-          (let ((direction (lookup rid input)))
-            ; If the return is 0, ask again
-            (if (zero? direction)
-                (loop rid)
-                (loop direction)))
-          (begin
-            ; If the input wasnt any of the memebers
-            (printf "huh? I didn't understand: ~a\n" input)
-            ; Otherwise loop back to the top with the new room id
-            (loop rid))))))
+(define (startgame initial-id)
+  (let loop ((id initial-id))
+    (format #t "~a\n> " (get-room-description id))
+    (let* ((input (read-line))
+           (string-tokens (string-tokenize input))
+           (tokens (map string->symbol string-tokens)))
+    (let ((response (lookup id tokens)))
+      (cond ((number? response)
+             (loop response #t))
+            ((eq? #f response)
+             (format #t "Huh? I didn't understand that!\n")
+             (loop id #f))
+            ((eq? response 'quit)
+             (format #t "BYE\n")
+             (exit)))))))
 
-;(startgame 1)
+(startgame 1)
