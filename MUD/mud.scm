@@ -7,21 +7,38 @@
 ;; MUD Version 3
 ;; Has advanced command line and actions
 ;; NEEDS COMMENTS ON CODE
-(define descriptions '((1 "You are in the lobby")
-                       (2 "You are in the hallway")
-                       (3 "You are in a swamp")))
 
-
+(define descriptions '((1 "room 1") (2 "room 2")
+                       (3 "room 3") (4 "room 4")
+                       (5 "room 5") (6 "room 6")
+                       (7 "room 7") (8 "room 8")
+                       (9 "room 9") (10 "room 10")
+                       (11 "room 11") (12 "room 12")
+                       (13 "room 13") (14 "room 14")
+                       (15 "room 15")))
+  
 (define look '(((directions) look) ((look) look) ((examine room) look)))
 (define quit '(((exit game) quit) ((quit game) quit) ((exit) quit) ((quit) quit)))
 ; Get put into another list
 (define actions `(,@look ,@quit))
 
-
-(define decisiontable `((1 ((north) 2) ((north west) 3) ,@actions)
-                        (2 ((south) 1) ,@actions)
-                        (3 ,@actions)))
-
+(define decisiontable `((1 ((north) 2) ,@actions)
+                        (2 ((north east) 5) ((east) 3) ,@actions)
+                        (3 ((north) 5) ((south) 4) ((west) 2),@actions)
+                        (4 ((north) 3) ,@actions)
+                        (5 ((south) 3) ((south west) 2) ((east) 6) ,@actions)
+                        (6 ((north) 8) ((south) 7) ((east) 9),@actions)
+                        (7 ((north) 6) ,@actions)
+                        (8 ((south) 6) ((south east) 9) ,@actions)
+                        (9 ((north west) 8) ((west) 6) ((south) 10) ((east) 14) ,@actions)
+                        (10 ((north) 9) ((east) 13) ((north east) 14)
+                            ((south) 11) ((south west) 12) ,@actions)
+                        (11 ((north) 10) ((north east) 13) ,@actions)
+                        (12 ((north east) 10) ,@actions)
+                        (13 ((north) 14) ((west) 10) ((south west) 11)
+                            ((east) 15) ,@actions)
+                        (14 ((west) 9) ((south) 13) ((south west) 10) ,@actions)
+                        (15 ((west) 13) ,@actions)))
 
 (define (slist->string l)
   (string-join (map symbol->string l)))
@@ -100,4 +117,4 @@
                (format #t "So Long, and Thanks for All the Fish...\n")
                (exit)))))))
 
-(startgame 1)
+(startgame 13)
