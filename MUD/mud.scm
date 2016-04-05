@@ -4,9 +4,13 @@
 (require srfi/13)
 (require srfi/48)
 
-;; MUD Version 3
-;; Has advanced command line and actions
-;; NEEDS COMMENTS ON CODE
+;; MUD Version 5
+;; Has more actions
+
+
+; Objects in rooms
+(define objects '((1 "A silver dagger")
+                  (1 "gold coin")))
 
 ; Room id and descriptions
 (define descriptions '((1 "You have entered the dungeon! Tread carefully.")
@@ -28,16 +32,21 @@
 ; Actions association list
 (define look '(((directions) look) ((look) look) ((examine room) look)))
 (define quit '(((exit game) quit) ((quit game) quit) ((exit) quit) ((quit) quit)))
+; Next 3 are for inventory and objects
+(define pick '(((get) pick) ((pickup) pick) ((pick) pick)))
+(define put '(((put) drop) ((drop) drop) ((place) drop) ((remove) drop)))
+(define inventory '(((inventory) inventory) ((bag) inventory)))
+
 
 ; Get put into another list
 ; Quasiquoting the list, to give special properties
 ; List filled with unquote (,) Using unquote splicing ,@ so the extra list is removed
-(define actions `(,@look ,@quit))
+(define actions `(,@look ,@quit ,@pick ,@put ,@inventory))
 
 
 ; Decision table data helps drive the game, and what happens in each room
 (define decisiontable `((1 ((north) 2) ,@actions)
-                        (2 ((north east) 5) ((east) 3) ,@actions)
+                        (2 ((north east) 5) ((south) 1) ((east) 3) ,@actions)
                         (3 ((north) 5) ((south) 4) ((west) 2),@actions)
                         (4 ((north) 3) ,@actions)
                         (5 ((south) 3) ((south west) 2) ((east) 6) ,@actions)
@@ -53,6 +62,84 @@
                             ((east) 15) ,@actions)
                         (14 ((south) 13) ((south west) 10) ,@actions)
                         (15 ((west) 13) ,@actions)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Managing objects
+
+; Hash tables
+; Tracks whats in the room
+(define objectdb (make-hash))
+; Tracks what your carrying
+(define inventorydb (make-hash))
+
+(define (add-object db id object)
+  (if (hash-has-key? db id)
+      (let ((record (hash-ref db id)))
+        (hash-set! db id (cons object record)))
+      (hash-set! db id (cons object empty))))
+
+; Will load whats in our object data into object database
+(define (add-objects db)
+  (for-each
+   (lambda (r)
+     (add-object db (first r) (second r))) objects))
+
+(add-objects objectdb)
+
+; NEEDS IMPROVING FOR NO ITEMS IN ROOM/ INVENTORY
+; Displaying objects
+; Used to show whats in the room or in the bag/ inventory
+(define (display-objects db id)
+  (when (hash-has-key? db id)
+    (let* ((record (hash-ref db id))
+           (output (string-join record " and " )))
+      (when (not (equal? output ""))
+        (if (eq? id 'bag)
+            (printf "You are carrying ~a.\n" output)
+            (printf "You can see ~a.\n" output))))))
+
+; Removing objects from rooms
+; When removing an item from a room, we add to our inventory
+(define (remove-object-from-room db id str)
+  (when (hash-has-key? db id)
+    (let* ((record (hash-ref db id))
+           (result (remove (lambda (x) (string-suffix-ci? str x)) record))
+           (item (lset-difference equal? record result)))
+      (cond ((null item)
+             (printf "I don't see that item in the room!\n"))
+            (else
+             (printf "Added ~a to your bag.\n" (first item))
+             (add-object inventorydb 'bag (first item))
+             (hash-set! db id result))))))
+
+; Removing items from your inventory
+; Similar t previous remove functions
+(define (remove-object-from-inventory db id str)
+  (when (hash-has-key? db 'bag)
+    (let* ((record (hash-ref db 'bag))
+           (result (remove (lambda (x) (string-suffix-ci? str x)) record))
+           (item (lset-difference equal? record result)))
+      (cond ((null item)
+             (printf "I aren't carrying that item in the room!\n"))
+            (else
+             (printf "Removed ~a from your bag.\n" (first item))
+             (add-object inventorydb 'id (first item))
+             (hash-set! db 'bag result))))))
+
+; Functions to use in game loop
+
+(define (pick-item id input)
+  (let ((item (string-join (cdr (string-split input)))))
+    (remove-object-from-room objectdb id item)))
+
+(define (put-item id input)
+  (let ((item (string-join (cdr (string-split input)))))
+    (remove-object-from-inventory inventorydb id item)))
+
+(define (display-inventory)
+  (display-objects inventorydb 'bag))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Obtaining room direction
@@ -78,20 +165,25 @@
              (let* ((losym (map (lambda (x) (car x)) result))
                     (lostr (map (lambda (x) (slist->string x)) losym)))
                (printf "You can see exits to the ~a.\n" (string-join lostr " and "))))))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (assq-ref assqlist id)
-  (cdr (assq id assqlist)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; User input
 
-(define (assv-ref assqlist id)
-  (cdr (assv id assqlist)))
+(define (ass-ref assqlist id func)
+  (cdr (func id assqlist)))
+
+;(define (assq-ref assqlist id)
+;  (cdr (assq id assqlist)))
+
+;(define (assv-ref assqlist id)
+;  (cdr (assv id assqlist)))
 
 (define (get-response id)
-  (car (assq-ref descriptions id)))
+  (car (ass-ref descriptions id assq)))
 
 (define (get-keywords id)
-  (let ((keys (assq-ref decisiontable id)))
+  (let ((keys (ass-ref decisiontable id assq)))
     (map (lambda (key) (car key)) keys)))
 
 
@@ -110,14 +202,16 @@
       #f
       (list-index (lambda (x) (eq? x n)) list-of-numbers))))
 
+; Function to use in game loop
 ; Wrapper for multi word input
 (define (lookup id tokens)
-  (let* ((record (assv-ref decisiontable id))
+  (let* ((record (ass-ref decisiontable id assv))
          (keylist (get-keywords id))
          (index (index-of-largest-number (list-of-lengths keylist tokens))))
     (if index 
       (cadr (list-ref record index))
       #f)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Game loop
@@ -148,9 +242,23 @@
               ((eq? response 'look)
                (get-directions id)
                (loop id #f))
+              ;((eq? response 'pick)
+              ; (pick-item id response)
+              ; (loop id #f))
+              ;((eq? response 'put)
+              ; (put-item id response)
+              ; (loop id #f))
+              ((eq? response 'inventory)
+               (display-inventory)
+               (loop id #f))
               ; When the input is the quit action
               ((eq? response 'quit)
                (format #t "So Long, and Thanks for All the Fish...\n")
                (exit)))))))
 
-;(startgame 13)
+;(define pick '(((get) pick) ((pickup) pick) ((pick) pick)))
+;(define put '(((put) drop) ((drop) drop) ((place) drop) ((remove) drop)))
+;(define inventory '(((inventory) inventory) ((bag) inventory)))
+    
+(startgame 1)
+ 
