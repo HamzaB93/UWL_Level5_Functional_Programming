@@ -255,10 +255,6 @@
               ((eq? response 'quit)
                (format #t "So Long, and Thanks for All the Fish...\n")
                (exit)))))))
-
-;(define pick '(((get) pick) ((pickup) pick) ((pick) pick)))
-;(define put '(((put) drop) ((drop) drop) ((place) drop) ((remove) drop)))
-;(define inventory '(((inventory) inventory) ((bag) inventory)))
     
 (startgame 1)
  
