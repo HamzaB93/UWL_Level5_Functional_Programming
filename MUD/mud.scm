@@ -4,11 +4,11 @@
 (require srfi/13)
 (require srfi/48)
 
-;; MUD Version 4
+;; MUD Version 5
 ;; Has advanced command line and actions
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Room decision tables and actions
+; Decision tables and actions
 
 ; Room id and descriptions
 (define descriptions '((1 "You have entered the dungeon! Tread carefully.")
@@ -27,14 +27,23 @@
                        (14 "You went upstairs and hit a dead end.")
                        (15 "There's an exit!")))
 
+; Objects decision table
+(define objects '((1 "a silver dagger")
+                  (1 "a gold coin")))
+
+
 ; Actions association list
 (define look '(((directions) look) ((look) look) ((examine room) look)))
 (define quit '(((exit game) quit) ((quit game) quit) ((exit) quit) ((quit) quit)))
+; More actions
+(define pick '(((get) pick) ((pickup) pick) ((pick) pick)))
+(define put '(((put) drop) ((drop) drop) ((place) drop) ((remove) drop)))
+(define inventory '(((inventory) inventory) ((bag) inventory)))
 
 ; Get put into another list
 ; Quasiquoting the list, to give special properties
 ; List filled with unquote (,) Using unquote splicing ,@ so the extra list is removed
-(define actions `(,@look ,@quit))
+(define actions `(,@look ,@quit ,@pick ,@put ,@inventory))
 
 
 ; Decision table data helps drive the game, and what happens in each room
@@ -55,6 +64,89 @@
                             ((east) 15) ,@actions)
                         (14 ((south) 13) ((south west) 10) ,@actions)
                         (15 ((west) 13) ,@actions)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Loading object databse
+
+; Hash table to track whats in a room
+(define objectdb (make-hash))
+
+; Hash table to track what we are carrying
+(define inventorydb (make-hash))
+
+; Adding the object to the databse
+(define (add-object db id object)
+  (if (hash-has-key? db id)
+      (let ((record (hash-ref db id)))
+        (hash-set! db id (cons object record)))
+      (hash-set! db id (cons object empty))))
+
+; Function will load what is in our databse into an objects database
+(define (add-objects db)
+  (for-each
+   (lambda (r)
+     (add-object db (first r) (second r))) objects))
+
+(add-objects objectdb)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Displaying our objects
+
+; We use this to display either what objects are in the room or bag
+; NEEDS IMPROVEMENTS FOR EMPTY ROOM AND BAG
+(define (display-objects db id)
+  (when (hash-has-key? db id)
+    (let* ((record (hash-ref db id))
+           (output (string-join record " and ")))
+      (when (not (equal? output ""))
+        (if (eq? id 'bag)
+            (printf "You are carrying ~a.\n" output)
+            (printf "You can see ~a.\n" output))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Removing objects
+
+; Remove from room
+; When we remove an item from a room we need to add it our inventory
+(define (remove-object-from-room db id str)
+  (when (hash-has-key? db id)
+    (let* ((record (hash-ref db id))
+           (result (remove (lambda (x) (string-suffix-ci? str x)) record))
+           (item (lset-difference equal? record result)))
+      (cond ((null? item)
+             (printf "I dont see that item in the room!\n"))
+            (else
+             (printf "Added ~a to your bag.\n" (first item))
+             (add-object inventorydb 'bag (first item))
+             (hash-set! db id result))))))
+
+; Remove objects from your inventory
+; When we remove an item from our bag/ inventory, we put it back into a room
+(define (remove-object-from-inventory db id str)
+  (when (hash-has-key? db 'bag)
+    (let* ((record (hash-ref db 'bag))
+           (result (remove (lambda (x) (string-suffix-ci? str x)) record))
+           (item (lset-difference equal? record result)))
+      (cond ((null? item)
+             (print "You are not carrying that item!\n"))
+            (else
+             (printf "Removed ~a from your bag.\n" (first item))
+             (add-object objectdb id (first item))
+             (hash-set! 'bag result))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Functions to call from the main loop
+
+(define (pick-item id input)
+  (let ((item (string-join (cdr (string-split input)))))
+    (remove-object-from-room objectdb id item)))
+
+(define (put-item id input)
+  (let ((item (string-join (cdr (string-split input)))))
+    (remove-object-from-inventory inventorydb id item)))
+
+(define (display-inventory)
+  (display-objects inventorydb 'bag))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Obtaining room direction
@@ -150,6 +242,14 @@
               ; When the input is the look action
               ((eq? response 'look)
                (get-directions id)
+               (loop id #f))
+              ; When the input is to pick
+              ((eq? response 'pick)
+               (pick-item id input)
+               (loop id #f))
+              ; When the input is to drop/put
+              ((eq? response 'drop)
+               (put-item id input)
                (loop id #f))
               ; When the input is the quit action
               ((eq? response 'quit)
