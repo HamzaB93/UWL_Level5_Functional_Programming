@@ -132,7 +132,7 @@
             (else
              (printf "Removed ~a from your bag.\n" (first item))
              (add-object objectdb id (first item))
-             (hash-set! 'bag result))))))
+             (hash-set! db 'bag result))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Functions to call from the main loop
@@ -256,5 +256,5 @@
                (format #t "So Long, and Thanks for All the Fish...\n")
                (exit)))))))
 
-(startgame 13)
+(startgame 1)
  
