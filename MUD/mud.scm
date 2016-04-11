@@ -10,26 +10,39 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Decision tables and actions
 
-; Room id and descriptions
+; Room id and descriptions ; 1 item rusted coin
 (define descriptions '((1 "You have entered the dungeon! Tread carefully.")
                        (2 "Now you're in a hallway, seems to be two ways to go.")
+                       ; 3 item shiny fork
                        (3 "You have entered a kitchen area. Looks like there's a storage area.")
-                       (4 "It's an empty storage area.")
+                       (4 "It's the storage area.")
                        (5 "You've entered another hallway.")
+                       ; 6 item bronze amulet
                        (6 "Seems, youve entered a bedroom area.")
+                       ; 7 item Silver bracelet
                        (7 "Looks like another bedroom.")
                        (8 "It's a living room.")
                        (9 "You've exited the bedroom and reached the balcony. Looks like there are stiars down.")
+                       ; 10 item Silver chalice
                        (10 "It's a courtyard. There a a few paths to take.")
+                       ; 11 shovel
                        (11 "You entered a green house.")
+                       ; 12 item long sword
                        (12 "You go downstairs and find an armoury.")
                        (13 "You've entered an underground entrance.")
+                       ; 14 GOLD COIN!
                        (14 "You went upstairs and hit a dead end.")
                        (15 "There's an exit!")))
 
 ; Objects decision table
-(define objects '((1 "a silver dagger")
-                  (1 "a gold coin")))
+(define objects '((1 "A rusted coin")
+                  (3 "A shiny fork")
+                  (6 "A bronze amulet")
+                  (7 "A silver braclet")
+                  (10 "A silver chalice")
+                  (11 "A shovel")
+                  (12 "A long sword")
+                  (14 "A GOLD COIN!")))
 
 
 ; Actions association list
@@ -48,7 +61,7 @@
 
 ; Decision table data helps drive the game, and what happens in each room
 (define decisiontable `((1 ((north) 2) ,@actions)
-                        (2 ((north east) 5) ((east) 3) ,@actions)
+                        (2 ((north east) 5) ((sout) 1) ((east) 3) ,@actions)
                         (3 ((north) 5) ((south) 4) ((west) 2),@actions)
                         (4 ((north) 3) ,@actions)
                         (5 ((south) 3) ((south west) 2) ((east) 6) ,@actions)
@@ -224,8 +237,10 @@
     ; When description is true
     (if description
         ; Get the response/ description
-        (printf "~a\n> " (get-response id))
-        (printf "> "))
+        (printf "~a\n" (get-response id))
+        (printf ""))
+    (display-objects objectdb id)
+    (printf "> ")
     ; User gives input, either one word or severs
     (let* ((input (read-line))
            (string-tokens (string-tokenize input))
@@ -250,6 +265,9 @@
               ; When the input is to drop/put
               ((eq? response 'drop)
                (put-item id input)
+               (loop id #f))
+              ((eq? response 'inventory)
+               (display-inventory)
                (loop id #f))
               ; When the input is the quit action
               ((eq? response 'quit)
