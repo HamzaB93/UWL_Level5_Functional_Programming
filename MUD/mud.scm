@@ -10,27 +10,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Decision tables and actions
 
-; Room id and descriptions ; 1 item rusted coin
+; Room id and descriptions association table
 (define descriptions '((1 "You have entered the dungeon! Tread carefully.")
                        (2 "Now you're in a hallway, seems to be two ways to go.")
-                       ; 3 item shiny fork
                        (3 "You have entered a kitchen area. Looks like there's a storage area.")
                        (4 "It's the storage area.")
-                       (5 "You've entered another hallway.")
-                       ; 6 item bronze amulet
                        (6 "Seems, youve entered a bedroom area.")
-                       ; 7 item Silver bracelet
                        (7 "Looks like another bedroom.")
                        (8 "It's a living room.")
                        (9 "You've exited the bedroom and reached the balcony. Looks like there are stiars down.")
-                       ; 10 item Silver chalice
                        (10 "It's a courtyard. There a a few paths to take.")
-                       ; 11 shovel
                        (11 "You entered a green house.")
-                       ; 12 item long sword
                        (12 "You go downstairs and find an armoury.")
                        (13 "You've entered an underground entrance.")
-                       ; 14 GOLD COIN!
                        (14 "You went upstairs and hit a dead end.")
                        (15 "There's an exit!")))
 
@@ -61,7 +53,7 @@
 
 ; Decision table data helps drive the game, and what happens in each room
 (define decisiontable `((1 ((north) 2) ,@actions)
-                        (2 ((north east) 5) ((sout) 1) ((east) 3) ,@actions)
+                        (2 ((north east) 5) ((south) 1) ((east) 3) ,@actions)
                         (3 ((north) 5) ((south) 4) ((west) 2),@actions)
                         (4 ((north) 3) ,@actions)
                         (5 ((south) 3) ((south west) 2) ((east) 6) ,@actions)
@@ -114,49 +106,42 @@
       (when (not (equal? output ""))
         (if (eq? id 'bag)
             (printf "You are carrying ~a.\n" output)
-            (printf "You can see ~a.\n" output))))))
+            (printf "You can see ~a.\n" output)))))
+  (when (not (hash-has-key? db id))
+    (printf "There are no items in your bag!\n")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Removing objects
 
-; Remove from room
-; When we remove an item from a room we need to add it our inventory
-(define (remove-object-from-room db id str)
-  (when (hash-has-key? db id)
-    (let* ((record (hash-ref db id))
+(define (remove-object db from add-to str)
+  (when (hash-has-key? db from)
+    (let* ((record (hash-ref db from))
            (result (remove (lambda (x) (string-suffix-ci? str x)) record))
            (item (lset-difference equal? record result)))
-      (cond ((null? item)
-             (printf "I dont see that item in the room!\n"))
-            (else
-             (printf "Added ~a to your bag.\n" (first item))
-             (add-object inventorydb 'bag (first item))
-             (hash-set! db id result))))))
-
-; Remove objects from your inventory
-; When we remove an item from our bag/ inventory, we put it back into a room
-(define (remove-object-from-inventory db id str)
-  (when (hash-has-key? db 'bag)
-    (let* ((record (hash-ref db 'bag))
-           (result (remove (lambda (x) (string-suffix-ci? str x)) record))
-           (item (lset-difference equal? record result)))
-      (cond ((null? item)
-             (print "You are not carrying that item!\n"))
-            (else
-             (printf "Removed ~a from your bag.\n" (first item))
-             (add-object objectdb id (first item))
-             (hash-set! db 'bag result))))))
+      (cond
+        ; remove from room
+        ((null? item)
+         (printf "Oops. Either the item isn't in the room, or you aren't carrying it!\n"))
+        ((number? from)
+         (printf "Added ~a to your bag.\n" (first item))
+         (add-object inventorydb add-to (first item))
+         (hash-set! db from result))
+        ; remove from bag
+        ((eq? from 'bag)
+         (printf "Removed ~a from your bag.\n" (first item))
+         (add-object objectdb add-to (first item))
+         (hash-set! db from result))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Functions to call from the main loop
 
-(define (pick-item id input)
+(define (pick-item2 id input)
   (let ((item (string-join (cdr (string-split input)))))
-    (remove-object-from-room objectdb id item)))
+    (remove-object objectdb id 'bag item)))
 
-(define (put-item id input)
+(define (put-item2 id input)
   (let ((item (string-join (cdr (string-split input)))))
-    (remove-object-from-inventory inventorydb id item)))
+    (remove-object inventorydb 'bag id item)))
 
 (define (display-inventory)
   (display-objects inventorydb 'bag))
@@ -260,11 +245,11 @@
                (loop id #f))
               ; When the input is to pick
               ((eq? response 'pick)
-               (pick-item id input)
+               (pick-item2 id input)
                (loop id #f))
               ; When the input is to drop/put
               ((eq? response 'drop)
-               (put-item id input)
+               (put-item2 id input)
                (loop id #f))
               ((eq? response 'inventory)
                (display-inventory)
