@@ -10,11 +10,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Decision tables and actions
 
-; Room id and descriptions association table
 (define descriptions '((1 "You have entered the dungeon! Tread carefully.")
                        (2 "Now you're in a hallway, seems to be two ways to go.")
                        (3 "You have entered a kitchen area. Looks like there's a storage area.")
                        (4 "It's the storage area.")
+                       (5 "You've entered another hallway.")
                        (6 "Seems, youve entered a bedroom area.")
                        (7 "Looks like another bedroom.")
                        (8 "It's a living room.")
@@ -40,7 +40,6 @@
 ; Actions association list
 (define look '(((directions) look) ((look) look) ((examine room) look)))
 (define quit '(((exit game) quit) ((quit game) quit) ((exit) quit) ((quit) quit)))
-; More actions
 (define pick '(((get) pick) ((pickup) pick) ((pick) pick)))
 (define put '(((put) drop) ((drop) drop) ((place) drop) ((remove) drop)))
 (define inventory '(((inventory) inventory) ((bag) inventory)))
@@ -107,8 +106,10 @@
         (if (eq? id 'bag)
             (printf "You are carrying ~a.\n" output)
             (printf "You can see ~a.\n" output)))))
-  (when (not (hash-has-key? db id))
-    (printf "There are no items in your bag!\n")))
+    (when (not (hash-has-key? db id))
+      (cond
+        ((eq? id 'bag) (printf "There are no items in your bag!\n"))
+        (else (printf "There are no items in the room!\n")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Removing objects
@@ -135,13 +136,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Functions to call from the main loop
 
-(define (pick-item2 id input)
-  (let ((item (string-join (cdr (string-split input)))))
-    (remove-object objectdb id 'bag item)))
+;(define (pick-item2 id input)
+;  (let ((item (string-join (cdr (string-split input)))))
+;    (remove-object objectdb id 'bag item)))
+;
+;(define (put-item2 id input)
+;  (let ((item (string-join (cdr (string-split input)))))
+;    (remove-object inventorydb 'bag id item)))
 
-(define (put-item2 id input)
+(define (pick-and-put id input func)
   (let ((item (string-join (cdr (string-split input)))))
-    (remove-object inventorydb 'bag id item)))
+    (cond
+      ((eq? func pick) (remove-object objectdb id 'bag item))
+      ((eq? func drop) (remove-object inventorydb 'bag id item)))))
 
 (define (display-inventory)
   (display-objects inventorydb 'bag))
@@ -244,12 +251,13 @@
                (get-directions id)
                (loop id #f))
               ; When the input is to pick
+              ;(pick-and-put id input func)
               ((eq? response 'pick)
-               (pick-item2 id input)
+               (pick-and-put id input pick)
                (loop id #f))
               ; When the input is to drop/put
               ((eq? response 'drop)
-               (put-item2 id input)
+               (pick-and-put id input drop)
                (loop id #f))
               ((eq? response 'inventory)
                (display-inventory)
@@ -260,4 +268,3 @@
                (exit)))))))
 
 (startgame 1)
- 
