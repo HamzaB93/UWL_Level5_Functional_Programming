@@ -3,13 +3,13 @@
 (require srfi/1)
 (require srfi/13)
 (require srfi/48)
-
-;; MUD Version 5
-;; Has advanced command line and actions
+(require racket/include)
+;(include "assoc_and_decision.rkt")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Decision tables and actions
 
+; Room description assoc list
 (define descriptions '((1 "You have entered the dungeon! Tread carefully.")
                        (2 "Now you're in a hallway, seems to be two ways to go.")
                        (3 "You have entered a kitchen area. Looks like there's a storage area.")
@@ -26,7 +26,7 @@
                        (14 "You went upstairs and hit a dead end.")
                        (15 "There's an exit!")))
 
-; Objects decision table
+;; Objects assoc list
 (define objects '((1 "A rusted coin")
                   (3 "A shiny fork")
                   (6 "A bronze amulet")
@@ -35,22 +35,22 @@
                   (11 "A shovel")
                   (12 "A long sword")
                   (14 "A GOLD COIN!")))
-
-
-; Actions association list
+;
+;
+;; Actions assoc list
 (define look '(((directions) look) ((look) look) ((examine room) look)))
 (define quit '(((exit game) quit) ((quit game) quit) ((exit) quit) ((quit) quit)))
 (define pick '(((get) pick) ((pickup) pick) ((pick) pick)))
 (define put '(((put) drop) ((drop) drop) ((place) drop) ((remove) drop)))
 (define inventory '(((inventory) inventory) ((bag) inventory)))
-
-; Get put into another list
-; Quasiquoting the list, to give special properties
-; List filled with unquote (,) Using unquote splicing ,@ so the extra list is removed
+;
+;; Get put into another list
+;; Quasiquoting the list, to give special properties
+;; List filled with unquote (,) Using unquote splicing ,@ so the extra list is removed
 (define actions `(,@look ,@quit ,@pick ,@put ,@inventory))
-
-
-; Decision table data helps drive the game, and what happens in each room
+;
+;
+;; Decision table data helps drive the game, and what happens in each room
 (define decisiontable `((1 ((north) 2) ,@actions)
                         (2 ((north east) 5) ((south) 1) ((east) 3) ,@actions)
                         (3 ((north) 5) ((south) 4) ((west) 2),@actions)
@@ -234,7 +234,7 @@
     (display-objects objectdb id)
     (printf "> ")
     ; User gives input, either one word or severs
-    (let* ((input (read-line))
+    (let* ((input (string-downcase (read-line)))
            (string-tokens (string-tokenize input))
            (tokens (map string->symbol string-tokens)))
       ; Get the response/ room id
@@ -244,27 +244,54 @@
                (loop response #t))
               ; When the response was not valid
               ((eq? #f response)
-               (format #t "huh? I didn't understand that!\n")
+               (format #t "Oops, didn't understand that. Try again!\n")
                (loop id #f))
-              ; When the input is the look action
-              ((eq? response 'look)
-               (get-directions id)
-               (loop id #f))
-              ; When the input is to pick
-              ;(pick-and-put id input func)
-              ((eq? response 'pick)
-               (pick-and-put id input pick)
-               (loop id #f))
-              ; When the input is to drop/put
-              ((eq? response 'drop)
-               (pick-and-put id input drop)
-               (loop id #f))
-              ((eq? response 'inventory)
-               (display-inventory)
-               (loop id #f))
-              ; When the input is the quit action
-              ((eq? response 'quit)
-               (format #t "So Long, and Thanks for All the Fish...\n")
-               (exit)))))))
+              ((memq response '(quit inventory drop pick look))
+               (game-loop id input response)
+               (loop id #f)))))))
+        
+              
+(define (game-loop id input response)
+  (cond
+    ((eq? response 'look)
+     (get-directions id))
+    ((eq? response 'pick)
+     (pick-and-put id input pick))
+    ((eq? response 'drop)
+     (pick-and-put id input drop))
+    ((eq? response 'inventory)
+     (display-inventory))
+    ((eq? response 'quit)
+     (format #t "Goodbye. Hope to see you again soon!\n")
+     (exit))))
+    
+
+
+              
+;              ; When the input is the look action
+;              ((eq? response 'look)
+;               (get-directions id)
+;               (loop id #f))
+;              ; When the input is to pick
+;              ((eq? response 'pick)
+;               (pick-and-put id input pick)
+;               (loop id #f))
+;              ; When the input is to drop/put
+;              ((eq? response 'drop)
+;               (pick-and-put id input drop)
+;               (loop id #f))
+;              ((eq? response 'inventory)
+;               (display-inventory)
+;               (loop id #f))
+;              ; When the input is the quit action
+;              ((eq? response 'quit)   
+;               (format #t "Goodbye. Hope to see you again soon!\n")
+;               (exit)))))))
+
+;(define game-loop-commands
+;  `(("directions" ,@get-directions)
+;    ("pick" ,@pick-and-put)
+;    ("drop" ,@pick-and-put)
+;    ("inventory" ,@display-inventory)))
 
 (startgame 1)
