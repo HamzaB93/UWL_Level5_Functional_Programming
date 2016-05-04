@@ -1,7 +1,7 @@
 ; File contains all the association lists, along with decision table for the
 ; MUD game
 
-; Room description assoc list
+; Association list for room descriptions
 (define descriptions '((1 "You have entered the dungeon! Tread carefully.")
                        (2 "Now you're in a hallway, seems to be two ways to go.")
                        (3 "You have entered a kitchen area. Looks like there's a storage area.")
@@ -18,7 +18,7 @@
                        (14 "You went upstairs and hit a dead end.")
                        (15 "There's an exit!")))
 
-; Objects assoc list
+; Association list for Objects that belong to certain rooms
 (define objects '((1 "A rusted coin")
                   (3 "A shiny fork")
                   (6 "A bronze amulet")
@@ -29,20 +29,20 @@
                   (14 "A GOLD COIN!")))
 
 
-; Actions assoc list
+; Actions assoc list, where keywords will result in an action
 (define look '(((directions) look) ((look) look) ((examine room) look)))
 (define quit '(((exit game) quit) ((quit game) quit) ((exit) quit) ((quit) quit)))
 (define pick '(((get) pick) ((pickup) pick) ((pick) pick)))
 (define put '(((put) drop) ((drop) drop) ((place) drop) ((remove) drop)))
 (define inventory '(((inventory) inventory) ((bag) inventory)))
 
-; Get put into another list
 ; Quasiquoting the list, to give special properties
 ; List filled with unquote (,) Using unquote splicing ,@ so the extra list is removed
 (define actions `(,@look ,@quit ,@pick ,@put ,@inventory))
 
 
 ; Decision table data helps drive the game, and what happens in each room
+; Each room will allow all actions to take place
 (define decisiontable `((1 ((north) 2) ,@actions)
                         (2 ((north east) 5) ((south) 1) ((east) 3) ,@actions)
                         (3 ((north) 5) ((south) 4) ((west) 2),@actions)

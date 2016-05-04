@@ -15,7 +15,7 @@
       ; If there are no room
       (cond ((= 0 n)
              (printf "You appear to have entered a room with no exits.\n"))
-            ; 1 rooms
+            ; 1 room
             ((= 1 n)
              (printf "You can see an exit to the ~a.\n" (slist->string (caar result))))
             (else
@@ -24,26 +24,29 @@
                     (lostr (map (lambda (x) (slist->string x)) losym)))
                (printf "You can see exits to the ~a.\n" (string-join lostr " and "))))))))
 
-; User input
-
 ; Returns the list depending on the id, table and functions
 (define (ass-ref assqlist id func)
   (cdr (func id assqlist)))
 
+; Get the repsonse/ description of the room
 (define (get-response id)
+  ; Use the ass-ref where the list us descriptions, id is the room
+  ; and function is assq
+  ; car used for presentation
   (car (ass-ref descriptions id assq)))
 
+; Get the keywords for the response depending on the id
 (define (get-keywords id)
   (let ((keys (ass-ref decisiontable id assq)))
     (map (lambda (key) (car key)) keys)))
 
 
-;; outputs a list in the form: (0 0 0 2 0 0)
+; Outputs a list in the form: (0 0 0 2 0 0)
 (define (list-of-lengths keylist tokens)
   (map 
    (lambda (x)
      (let ((set (lset-intersection eq? tokens x)))
-       ;; apply some weighting to the result
+       ;; Apply some weighting to the result
        (* (/ (length set) (length x)) (length set))))
    keylist))
 
