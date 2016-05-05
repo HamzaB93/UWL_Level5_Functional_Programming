@@ -31,10 +31,24 @@
      (display-inventory))
     ; When respone to quit
     ((eq? response 'quit)
+     ; Use the quit game function
+     (quit-game id))))
+
+(define (quit-game id)
+  (cond
+    ; If the room id was 10 (the final room)
+    ((eq? id 10)
+     (printf "Well done for finding the exit!\n"))
+    (else
      ; Give message
-     (format #t "Goodbye. Hope to see you again soon!\n")
-     ; Exit the game
-     (exit))))
+     (printf "You didn't find the exit! Maybe next time!\n")))
+  ; Shows what items were in the bag
+  (printf "Here are the items you collected: \n")
+  (display-inventory)
+  ; Goodbye message
+  (format #t "Goodbye. Hope to see you again soon!\n")
+  ; Exit the game
+  (exit))
 
 ; Start game with given id
 (define (startgame initial-id)
@@ -56,7 +70,7 @@
       (let ((response (lookup id tokens)))
         ; Conditions
         (cond
-          ; If the returned response from lookup is a number
+          ; If the returned response from lookup is a number/ room id
           ((number? response)
            ; Loop with new room id
            (loop response #t))
@@ -74,4 +88,4 @@
            (loop id #f)))))))
 
 ; Start the game with initial room id
-(startgame 1)
+(startgame 10)
