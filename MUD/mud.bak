@@ -91,4 +91,4 @@
            (loop id #f)))))))
 
 ; Start the game with initial room id
-(startgame 1)
+(startgame 10)

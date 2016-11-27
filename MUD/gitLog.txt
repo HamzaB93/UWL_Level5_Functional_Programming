@@ -1,0 +1,143 @@
+commit 8d4b9aa0d2eb0311a9e76cf493696e25e1c04154
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Thu May 5 11:03:05 2016 +0100
+
+    Change the structure of the dungeon to 10 rooms. Add a quit game function where specific messages are given and bag is displayed.
+
+commit 561fbe451d0c7e32ae3a2535ae67c48d1cc26d6c
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Wed May 4 13:50:10 2016 +0100
+
+    Add more line by line comments to all files.
+
+commit 46b383b0d834ae31b33032be6694bfd1545e12b3
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Tue May 3 16:54:15 2016 +0100
+
+    Split into seperate files. Main file is mud.rkt.
+
+commit 22837e474a9eb437bfab8ff475825656d8be07a9
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Tue May 3 16:09:06 2016 +0100
+
+    Refactor game loop. Remove repetition and point to another function called game-loop.
+
+commit ffdfdfbd377bdf0091f2628187a47baf0f082462
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Sat Apr 23 16:43:07 2016 +0100
+
+    Assignment 2 V7: Made wrapper for the pick and put functions. Also made ammendments for the display-object function. Will display different message if the bag or room is empty.
+
+commit 4bdc244f7fee63ff3c88af2d3d140bea469355b5
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Fri Apr 22 18:53:38 2016 +0100
+
+    Assignment 2 V6: Refactored the remove-object-from-room and bag functions by merging them  into one. The wrapper functions are pick-item2 and put-item2. Game still works.
+
+commit b482f42d532e14e0bf5c70a58e9ef81938c88958
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Mon Apr 11 13:17:51 2016 +0100
+
+    Assignment 2: Added more items to pick up.
+
+commit 59ee1480a1b3f63f28c7eafb2841e044f82bf548
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Sun Apr 10 16:58:41 2016 +0100
+
+    Assignemnt 2 V5: Actions all work, didnt work before because ran off the 13th room instead of 1st.
+
+commit 861b16e8e5f682a1205dedb60ca1670bd56ff625
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Sun Apr 10 16:54:22 2016 +0100
+
+    Assignement2: Added more actions, but game loop isnt working.
+
+commit 96906d8e4dc3fa50ddf56c939d19d1e044668fc8
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Sun Apr 10 12:06:01 2016 +0100
+
+    Assingment2 V4: Going back to old version, need to redo the pick actions etc.
+
+commit 1ba85328c34826b87bcda957d672df2853b79053
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Tue Apr 5 16:06:11 2016 +0100
+
+    Assignment 2: Refactored assq and assv into one function.
+
+commit 1e185e004d5e36c20a6ebb1584ab7214f2594e97
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Tue Apr 5 16:00:53 2016 +0100
+
+    Assignment 2: Refactored the assq and assv function into one
+
+commit bcc96029a4cf7180f828af28deebb454a0c0ed3f
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Wed Mar 30 18:40:26 2016 +0100
+
+    Assignment 2: Updated mud with comments. Need to add more actions.
+
+commit 5fd9df4f19a1ce861741b8e3dc1806c3792fe2fd
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Tue Mar 29 16:29:27 2016 +0100
+
+    Assignment 2: Add rooms, need descriptions and comments.
+
+commit a774a2865652a443ab9a63d65cc533bb294305de
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Sun Mar 27 18:25:46 2016 +0100
+
+    Assignment 2: Using week 7 code, needs comments and an actual dungeon.
+
+commit 5bb099e5b5a283dc567bd0bdab020ab0160ca785
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Sun Mar 27 17:23:06 2016 +0100
+
+    Assignment 2: Problem with advanced mud, will likely need to use the advanced mud from week 7 with actions to make progress. Will commenent on those.
+
+commit 2e8411f5d4a06ae652196e953c3bea28e2de6614
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Sat Mar 26 16:00:29 2016 +0000
+
+    Assingment 2: Full commented code. Needs more directions and an exit.
+
+commit 5c08dbe0735c0096dd41e28ec3ad88afe7df78ae
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Sat Mar 26 15:18:09 2016 +0000
+
+    Assingment2: upload v1 of mud, needs comments for understanding.
+
+commit 00fe2451874b27f14497c37a4b0c470de7eab209
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Fri Mar 25 15:38:35 2016 +0000
+
+    Week6: commented on advanced and simple command line.
+
+commit 40642d112cde30aa93c8975cacabb32931d2fbf0
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Tue Mar 22 13:53:53 2016 +0000
+
+    Pre Assignment: Commented simple mud, needs amending though.
+
+commit c998e9ad37a65d97e6caaa0999c8ac0128104de4
+Author: unknown <hamzabhatti93@gmail.com>
+Date:   Thu Mar 17 13:23:57 2016 +0000
+
+    Full commit: Add all weeks work. Issue with with week6, command line not working.
+
+commit cd0e7316913bbe163ca1b91f6eab62344a03a9a1
+Author: Hamza <https://HamzaB93@bitbucket.org/HamzaB93/uwl_compsci4_lab.git>
+Date:   Tue Feb 9 15:52:35 2016 +0000
+
+    Week1 and 2: Fixed some of the exercises from week 1. Completed the week2 lecture notes. Still need to figure out how to complete fizz buzz.
+
+commit d8400ae02685df4bd3289f7bd8beb90036c0e5a0
+Author: Hamza <https://HamzaB93@bitbucket.org/HamzaB93/uwl_compsci4_lab.git>
+Date:   Tue Feb 2 09:58:35 2016 +0000
+
+    Week1: Made inclass program. Also done most of the exercises provided, but may need to edit them.
+
+commit e5f4498a1eb30ae796daaa125af8a672cb6fe28c
+Author: Hamza <https://HamzaB93@bitbucket.org/HamzaB93/uwl_compsci4_lab.git>
+Date:   Sat Jan 30 12:02:00 2016 +0000
+
+    Level 4 Tasks: This commit contains tasks that were provided in level 4. These can be used as a guide.
